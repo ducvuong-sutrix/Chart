@@ -1,29 +1,47 @@
 var canvas = $('#line-chart');
+$('#fromDate').datepicker({
+  minDate: 0,
+  dateFormat: 'dd-mm-yy',
+  beforeShow: function() {
+    $(this).datepicker('option', 'maxDate', $('#to').val());
+  }
+});
+$('#toDate').datepicker({
+    minDate: 0,
+  dateFormat: 'dd-mm-yy',
+  beforeShow: function() {
+    $(this).datepicker('option', 'maxDate', $('#from').val());
+    if ($('#from').val() === '') $(this).datepicker('option', 'minDate', 0);
+  }
+});
+
+function init(res) {
+    var dataLineOne = [],
+    dataLineTwo = [],
+    date = [];
+    res = JSON.parse(res);
+    res.forEach( function(element, index) {
+        dataLineOne.push(element['Oxy']);
+        dataLineTwo.push(element['HeartBeat']);
+        date.push(element['DateTime']);
+    });
+    var data = dataChart(date, dataLineOne, dataLineTwo);
+    var option = optionChart();
+    Chart.Line(canvas,{
+        data:data,
+        options:option
+    });
+}
 $.ajax({
     url: '../json/data.json',
     type: 'GET',
     success: function(res) {
-        var dataLineOne = [],
-            dataLineTwo = [],
-            date = [];
-        res = JSON.parse(res);
-        res.forEach( function(element, index) {
-            dataLineOne.push(element['Oxy']);
-            dataLineTwo.push(element['HeartBeat']);
-            date.push(element['DateTime']);
-        });
-        var data = dataChart(date, dataLineOne, dataLineTwo);
-        var option = optionChart();
-        Chart.Line(canvas,{
-              data:data,
-              options:option
-          });
-
+        init(res);
       },
       error: function(err) {
         console.log(err);
     }
-})
+});
 function dataChart(date, dataLineOne, dataLineTwo) {
     var data = {
         labels: date,
@@ -120,3 +138,20 @@ function optionChart() {
         // }
     }
 }
+$('#search').click(function() {
+
+    $.ajax({
+        url: 'http://zxczc.com',
+        type: 'POST',
+        data: {
+            'fromDate' : $('#fromDate').val(),
+            'toDate' : $('#toDate').val()
+        },
+        success: function(res) {
+            init(res);
+          },
+          error: function(err) {
+            console.log(err);
+        }
+    });
+});
