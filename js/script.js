@@ -20,6 +20,9 @@ function init(res) {
     dataLineTwo = [],
     date = [];
     res = JSON.parse(res);
+    $('#table').bootstrapTable({
+        data: res
+    });
     res.forEach( function(element, index) {
         dataLineOne.push(element['Oxy']);
         dataLineTwo.push(element['HeartBeat']);
@@ -31,6 +34,7 @@ function init(res) {
         data:data,
         options:option
     });
+
 }
 $.ajax({
     url: '../json/data.json',
